@@ -1,4 +1,4 @@
-package com.codeExecutor.dto;
+package com.codeExecutor.model;
 
 public enum OutputType {
 	

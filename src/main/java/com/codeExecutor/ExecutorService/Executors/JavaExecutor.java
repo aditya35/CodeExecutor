@@ -10,14 +10,14 @@ import javax.tools.ToolProvider;
 
 import org.springframework.stereotype.Component;
 
-import com.codeExecutor.dto.Output;
-import com.codeExecutor.dto.OutputType;
+import com.codeExecutor.model.Output;
+import com.codeExecutor.model.OutputType;
 
 @Component
 public class JavaExecutor {
 
 
-	public Output compile(String fileName, String name, String dir) {
+	public Output compile(String name, String fileName, String dir) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		int result = -1;
 		ByteArrayOutputStream streamErr = new ByteArrayOutputStream();
@@ -33,7 +33,7 @@ public class JavaExecutor {
 
 	}
 
-	public Output excute(String fileName, String name, String dir, String inputFileName, int timeout)
+	public Output execute(String name, String fileName, String dir, String inputFileName, int timeout)
 			throws InterruptedException, IOException {
 		String runScript;
 		if (inputFileName == null) {
@@ -61,9 +61,9 @@ public class JavaExecutor {
 		} else {
 			double  exTime = (double) (endTime - startTime) / 1000 ;
 
+			//check Runtime Errors
 			Scanner error = new Scanner(p.getErrorStream());
 			StringBuilder errorBuilder  = new StringBuilder();
-			//check Runtime Errors
 			if (error.hasNext()) {
 				while (error.hasNext()) {
 					errorBuilder.append(error.nextLine()+"\n");

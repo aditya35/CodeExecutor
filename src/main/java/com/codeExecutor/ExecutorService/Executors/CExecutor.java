@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
-import com.codeExecutor.dto.Output;
-import com.codeExecutor.dto.OutputType;
+import com.codeExecutor.model.Output;
+import com.codeExecutor.model.OutputType;
 
 @Component
 public class CExecutor {
@@ -45,7 +45,7 @@ public class CExecutor {
 
 	}
 
-	public Output execute(String fileName, String name, String dir, String inputFileName, int timeout)
+	public Output execute(String name, String fileName, String dir, String inputFileName, int timeout)
 			throws IOException, InterruptedException {
 		ProcessBuilder builder = new ProcessBuilder();
 		String runScript;

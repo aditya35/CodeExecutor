@@ -1,7 +1,12 @@
 package com.codeExecutor.ExecutorService;
 
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,14 +55,23 @@ public class hello {
     }
 
 	
+    @CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping("/hello")
-	public String printHello() {
+	public ResponseEntity printHello() {
 		String id = "hello";
 		String usrDir = System.getProperty("user.dir");
-		executor.runCode(JavaHelloWorld(id),id,"java");
-//		executor.runCode(cHelloWorld(), id,"c");
-//		executor.runCode(cppHelloWorld(), id, "cpp");
-		return usrDir;
+		try {
+//			executor.runCode(JavaHelloWorld(id),id,"java","111");
+//			executor.runCode(cHelloWorld(), id,"c","111");
+			executor.runCode(cppHelloWorld(), id, "cpp","111");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ResponseEntity("hello",HttpStatus.OK);
 	}
 
 }

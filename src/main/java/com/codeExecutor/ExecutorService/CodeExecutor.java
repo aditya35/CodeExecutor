@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
 
 import com.codeExecutor.ExecutorService.Executors.CExecutor;
 import com.codeExecutor.ExecutorService.Executors.JavaExecutor;
-import com.codeExecutor.dto.Output;
-import com.codeExecutor.dto.OutputType;
+import com.codeExecutor.model.Output;
+import com.codeExecutor.model.OutputType;
 
 @Component
 public class CodeExecutor {
 
 	@Autowired
 	private JavaExecutor javaExecutor;
-	
+
 	@Autowired
 	private CExecutor cExecutor;
 
@@ -35,7 +35,7 @@ public class CodeExecutor {
 			tempDir.mkdirs();
 		}
 		String filepath = dir + "/" + fileName + "/" + name + ext;
-		
+
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(filepath)))) {
 			writer.write(code);
 		}
@@ -46,55 +46,51 @@ public class CodeExecutor {
 		FileUtils.deleteDirectory(new File(dirPath));
 	}
 
-	public void runJavaCode(String code, String name) throws IOException, InterruptedException {
+	public Output runCode(String code, String name, String lang,String input) throws IOException, InterruptedException {
 		String dirName = "samples";
-		String input = "Aditya";
 		String fileName = randomFileTimeStampName();
-		createFile(fileName, code, dirName, ".java", name);
-		Output compileRes = javaExecutor.compile(fileName, name, dirName);
-		if (compileRes.getType()==OutputType.SUCCESS) {
-			createFile(fileName, input, dirName, "", "input");
-			Output exeRes = javaExecutor.excute(fileName, name, dirName, "input", 3);
-			System.out.println(exeRes.getType()+"\n"+exeRes.getOutput()+"time "+exeRes.getTime());
-		}else {
-			System.out.println(compileRes.getType()+"\n"+compileRes.getOutput());
-		}
+		Output compileResult = null;
+		Output executionResult = null;
 
-		cleanDirectory(dirName, fileName);
-	}
-
-	public void runCppCode(String code, String name, String lang) throws IOException, InterruptedException {
-		String dirName = "samples";
-		String input = "111";
-		String fileName = randomFileTimeStampName();
-		Output compileRes = null;
-		Output exeRes = null;
-		if (lang.equalsIgnoreCase("c")) {
+		//compile
+		switch (lang) {
+		case "java":
+			createFile(fileName, code, dirName, ".java", name);
+			compileResult = javaExecutor.compile(name, fileName, dirName);
+			break;
+		case "c":
 			createFile(fileName, code, dirName, ".c", name);
-		} else {
+			compileResult = cExecutor.compile(name, fileName, dirName, lang, 3);
+			break;
+		case "cpp":
 			createFile(fileName, code, dirName, ".cpp", name);
+			compileResult = cExecutor.compile(name, fileName, dirName, lang, 3);
+			break;
 		}
-		compileRes= cExecutor.compile(name, fileName, dirName, lang, 3);
-		if(compileRes.getType() == OutputType.SUCCESS) {
+		
+		//execute
+		if (compileResult.getType() == OutputType.SUCCESS) {
 			createFile(fileName, input, dirName, "", "input");
-			exeRes = cExecutor.execute(fileName, name, dirName, "input", 3);
-			System.out.println(exeRes.getType()+"\n"+exeRes.getOutput()+"time "+exeRes.getTime());
-		}else {
-			System.out.println(compileRes.getType()+"\n"+compileRes.getOutput());
-		}
-		cleanDirectory(dirName, fileName);
-	}
-
-	public void runCode(String code, String name, String lang) {
-		try {
-			if (lang.equalsIgnoreCase("java")) {
-				runJavaCode(code, name);
-			} else if (lang.equalsIgnoreCase("cpp") || lang.equalsIgnoreCase("c")) {
-				runCppCode(code, name, lang);
+			switch (lang) {
+			case "java":
+				executionResult = javaExecutor.execute(name, fileName, dirName, "input", 3);
+				break;
+			case "c":
+				executionResult = cExecutor.execute(name, fileName, dirName, "input", 3);
+				break;
+			case "cpp":
+				executionResult = cExecutor.execute(name, fileName, dirName, "input", 3);
+				break;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+//			System.out.println(exeRes.getType() + "\n" + exeRes.getOutput() + "time " + exeRes.getTime());
+			cleanDirectory(dirName, fileName);
+			return executionResult;
+		} else {
+//			System.out.println(compileRes.getType() + "\n" + compileRes.getOutput());
+			cleanDirectory(dirName, fileName);
+			return compileResult;
 		}
+		
 	}
 
 }
