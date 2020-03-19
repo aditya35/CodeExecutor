@@ -2,12 +2,14 @@ package com.codeExecutor.model;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -24,27 +26,17 @@ public class Question {
 	@Column(name = "time")
 	private double time;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "name")
-	private List<TestCase> testCases;
+//	@OneToOne(mappedBy = "testcase" , cascade = CascadeType.ALL)
+//	private TestCase testCases;
 
 	public Question() {
 	}
 
-	public Question(String name, String description, int time, List<TestCase> testCases) {
+	public Question(String name, String description, double time, TestCase testCases) {
 		super();
 		this.name = name;
 		this.description = description;
 		this.time = time;
-		this.testCases = testCases;
-	}
-
-	public List<TestCase> getTestCases() {
-		return testCases;
-	}
-
-	public void setTestCases(List<TestCase> testCases) {
-		this.testCases = testCases;
 	}
 
 	public String getName() {
@@ -73,7 +65,7 @@ public class Question {
 
 	@Override
 	public String toString() {
-		return "Question [name=" + name + ", description=" + description + ", time=" + time + ", testCases=" + testCases
+		return "Question [name=" + name + ", description=" + description + ", time=" + time + ", testCases=" 
 				+ "]";
 	}
 	

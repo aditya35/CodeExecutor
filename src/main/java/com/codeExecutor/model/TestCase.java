@@ -1,5 +1,6 @@
 package com.codeExecutor.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -25,10 +27,10 @@ public class TestCase {
 	@Column(name = "output")
 	private String output;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="name")
-	private Question question;
-
+//	@OneToOne(cascade = CascadeType.ALL)
+//	@JoinColumn(name="")
+//	private Question question;
+//	
 	public TestCase() {
 	}
 
@@ -36,12 +38,10 @@ public class TestCase {
 		return id;
 	}
 	
-	public TestCase(long id, String input, String output, Question question) {
+	public TestCase(String input, String output) {
 		super();
-		this.id = id;
 		this.input = input;
 		this.output = output;
-		this.question = question;
 	}
 
 	public void setId(long id) {
@@ -64,17 +64,9 @@ public class TestCase {
 		this.output = output;
 	}
 
-	public Question getQuestion() {
-		return question;
-	}
-
-	public void setQuestion(Question question) {
-		this.question = question;
-	}
-
 	@Override
 	public String toString() {
-		return "TestCase [id=" + id + ", input=" + input + ", output=" + output + ", question=" + question + "]";
+		return "TestCase [id=" + id + ", input=" + input + ", output=" + output + ", question="  + "]";
 	}
 
 	
