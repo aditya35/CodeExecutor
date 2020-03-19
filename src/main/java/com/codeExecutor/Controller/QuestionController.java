@@ -35,6 +35,7 @@ public class QuestionController {
 
 	@PostMapping("/question")
 	public String addNewQuestion(@RequestBody Question question) {
+		System.out.println(question);
 		return questionDAO.addQuestion(question);
 	}
 

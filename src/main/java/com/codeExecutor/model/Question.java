@@ -1,8 +1,13 @@
 package com.codeExecutor.model;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -12,28 +17,34 @@ public class Question {
 	@Id
 	@Column(name = "name")
 	private String name;
-	
+
 	@Column(name = "description")
 	private String description;
-	
-	@Column(name = "time")
-	private int time;
-	
-	@Column(name = "sample_input")
-	private String sInput;
-	
-	@Column(name = "sample_output")
-	private String sOutput;
-	
-	public Question(){}
 
-	public Question(String name, String description, int time, String sInput, String sOutput) {
+	@Column(name = "time")
+	private double time;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name = "name")
+	private List<TestCase> testCases;
+
+	public Question() {
+	}
+
+	public Question(String name, String description, int time, List<TestCase> testCases) {
 		super();
 		this.name = name;
 		this.description = description;
 		this.time = time;
-		this.sInput = sInput;
-		this.sOutput = sOutput;
+		this.testCases = testCases;
+	}
+
+	public List<TestCase> getTestCases() {
+		return testCases;
+	}
+
+	public void setTestCases(List<TestCase> testCases) {
+		this.testCases = testCases;
 	}
 
 	public String getName() {
@@ -52,28 +63,19 @@ public class Question {
 		this.description = description;
 	}
 
-	public int getTime() {
+	public double getTime() {
 		return time;
 	}
 
-	public void setTime(int time) {
+	public void setTime(double time) {
 		this.time = time;
 	}
 
-	public String getsInput() {
-		return sInput;
+	@Override
+	public String toString() {
+		return "Question [name=" + name + ", description=" + description + ", time=" + time + ", testCases=" + testCases
+				+ "]";
 	}
-
-	public void setsInput(String sInput) {
-		this.sInput = sInput;
-	}
-
-	public String getsOutput() {
-		return sOutput;
-	}
-
-	public void setsOutput(String sOutput) {
-		this.sOutput = sOutput;
-	}
-
+	
+	
 }
