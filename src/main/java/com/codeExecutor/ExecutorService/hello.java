@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codeExecutor.dao.QuestionDAO;
+import com.codeExecutor.dao.TestCaseDAO;
 import com.codeExecutor.model.Question;
 import com.codeExecutor.model.TestCase;
 
@@ -86,11 +87,26 @@ public class hello {
     @GetMapping("/test")
     public void testHiberante() {
 //    	List<TestCase> testList = new ArrayList<>();
-    	TestCase test1 = new TestCase("1 2 3 4","4 3 2 1");
-    	Question testQues = new Question("arraySwap", "program to swap array", 1.23, test1);
-    	questionDAO.addQuestion(testQues);
-    	
+//    	TestCase test1 = new TestCase("1 2 3 4","4 3 2 1");
+//    	Question testQues = new Question("arraySwap", "program to swap array", 1.23, test1);
+//    	questionDAO.addQuestion(testQues);
+//    	
     	
     }
+    
+    
+//    @Autowired
+//    private TestCaseDAO testCaseDAO;
+    
+//    @GetMapping("/testCases")
+//    public String  testTestCaes() {
+////    	System.out.println(testCaseDAO.getQuestionTestCases("array1"));
+////    	testCaseDAO.deleteTestCases("array1");
+////    	testCaseDAO.addTestCase(new TestCase("1 2 3 4", "4 3 2 1", "array2"));
+////    	System.out.println(testCaseDAO.getQuestionTestCases("array2"));
+//    	testCaseDAO.deleteTestCases("array2");
+//    	return  "done";
+////    	System.out.println("hello");
+//    }
 
 }

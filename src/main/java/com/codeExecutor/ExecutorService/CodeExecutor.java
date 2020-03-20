@@ -17,6 +17,7 @@ import com.codeExecutor.ExecutorService.Executors.CExecutor;
 import com.codeExecutor.ExecutorService.Executors.JavaExecutor;
 import com.codeExecutor.model.Output;
 import com.codeExecutor.model.OutputType;
+import com.codeExecutor.model.TestCase;
 
 @Component
 public class CodeExecutor {
@@ -152,8 +153,7 @@ public class CodeExecutor {
 
 	}
 
-	public List<Output> compileRunTestCases(String code, String name, String lang, List<String> inputList,
-			List<String> outputList) throws IOException, InterruptedException {
+	public List<Output> compileRunTestCases(String code, String name, String lang, List<TestCase> testCases) throws IOException, InterruptedException {
 
 		String dirName = "samples";
 		String fileName = randomFileTimeStampName();
@@ -165,18 +165,18 @@ public class CodeExecutor {
 
 		if (compileResult.getType() == OutputType.SUCCESS) {
 
-			int nTests = Math.min(inputList.size(), outputList.size());
+			int nTests = testCases.size();
 			List<Output> executionOutputs = new ArrayList<>();
 
 			for (int i = 0; i < nTests; i++) {
 
 				// execute
-				executionResult = execute(name, lang, inputList.get(i), fileName, dirName);
+				executionResult = execute(name, lang, testCases.get(i).getInput(), fileName, dirName);
 
 				// check expected output and actual output
 				if (executionResult.getType() == OutputType.SUCCESS) {
 
-					if (!comareOutputs(executionResult.getOutput(), outputList.get(i))) {
+					if (!comareOutputs(executionResult.getOutput(), testCases.get(i).getOutput())) {
 						executionResult.setOutput("Sample Test Case Failed");
 						executionResult.setType(OutputType.FAILURE);
 					}

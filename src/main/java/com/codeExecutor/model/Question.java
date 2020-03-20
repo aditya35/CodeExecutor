@@ -1,15 +1,8 @@
 package com.codeExecutor.model;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -26,17 +19,22 @@ public class Question {
 	@Column(name = "time")
 	private double time;
 
-//	@OneToOne(mappedBy = "testcase" , cascade = CascadeType.ALL)
-//	private TestCase testCases;
+	@Column(name = "sample_input")
+	private String sInput;
+
+	@Column(name = "sample_output")
+	private String sOutput;
 
 	public Question() {
 	}
 
-	public Question(String name, String description, double time, TestCase testCases) {
+	public Question(String name, String description, double time, String sInput, String sOutput) {
 		super();
 		this.name = name;
 		this.description = description;
 		this.time = time;
+		this.sInput = sInput;
+		this.sOutput = sOutput;
 	}
 
 	public String getName() {
@@ -63,11 +61,20 @@ public class Question {
 		this.time = time;
 	}
 
-	@Override
-	public String toString() {
-		return "Question [name=" + name + ", description=" + description + ", time=" + time + ", testCases=" 
-				+ "]";
+	public String getsInput() {
+		return sInput;
 	}
-	
-	
+
+	public void setsInput(String sInput) {
+		this.sInput = sInput;
+	}
+
+	public String getsOutput() {
+		return sOutput;
+	}
+
+	public void setsOutput(String sOutput) {
+		this.sOutput = sOutput;
+	}
+
 }
