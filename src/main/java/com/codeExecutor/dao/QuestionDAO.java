@@ -52,7 +52,7 @@ public class QuestionDAO {
 		if(currentSession.contains(question)) {
 			return "Question already present";
 		}
-		System.out.println(question);
+//		System.out.println(question);
 		currentSession.save(question);
 		return "Question added";
 	}

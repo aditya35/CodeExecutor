@@ -1,6 +1,5 @@
 package com.codeExecutor.Controller;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codeExecutor.dao.QuestionDAO;
@@ -34,37 +32,47 @@ public class QuestionController {
 	}
 
 	@GetMapping("/question/{name}")
-	public Question getQuestion(@PathVariable String name) {
+	public ResponseEntity<Question> getQuestion(@PathVariable String name) {
 		Question question = questionDAO.getQuestion(name);
 		if (question == null) {
-			throw new RuntimeException("Question not Found");
+			return ResponseEntity.notFound().build();
 		}
-		return question;
+		return new ResponseEntity<Question>(question,HttpStatus.OK);
 	}
 
 	@PostMapping("/question")
-	public String addNewQuestion(@RequestBody Question question) {
-		return questionDAO.addQuestion(question);
-//		if(returnMsg.equalsIgnoreCase("check file Name")) {
-//			return ResponseEntity.status("check fileName",HttpStatus.BAD_REQUEST).build();
-//		}
+	public ResponseEntity<String> addNewQuestion(@RequestBody Question question) {
+		if(question == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		String returnMsg = questionDAO.addQuestion(question);
+		if(returnMsg.equalsIgnoreCase("check file Name")) {
+			return new ResponseEntity<String>("Invalid Question Name", HttpStatus.BAD_REQUEST);
+		} else if (returnMsg.equalsIgnoreCase("Question already present")) {
+			return new ResponseEntity<String>("Question already Present",HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<String>("Question Added",HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/testcases")
-	public void addTestCases(@RequestBody List<TestCase> testCases) {
-		/*TODO  add batch processing support*/
+	public ResponseEntity addTestCases(@RequestBody List<TestCase> testCases) {
+		if(testCases.size()==0) {
+			return ResponseEntity.badRequest().build();
+		}
 		for (TestCase test : testCases) {
 			testCaseDAO.addTestCase(test);
 		}
+		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/question/{name}")
-	public void deleteQuestion(String name) {
+	public ResponseEntity<String> deleteQuestion(String name) {
 		try {
 			questionDAO.deleteQuestion(name);
 			testCaseDAO.deleteTestCases(name);
 		}catch (Throwable e) {
-			throw e;
+			return new ResponseEntity<String>("Error deleting Question",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		return new ResponseEntity<String>("Deleted",HttpStatus.OK);
 	}
 }

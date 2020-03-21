@@ -21,6 +21,9 @@ public class CodePlayGroundController {
 
 	@PostMapping("/playground")
 	public ResponseEntity<Output> playGround( @RequestBody Input input) throws IOException, InterruptedException {
+		if(input == null) {
+			return new ResponseEntity<Output>(HttpStatus.BAD_REQUEST);
+		}
 			Output playGroundOutput = codeExecutor.runCode(input.getCode(), "Sample", input.getLang(), input.getInput());
 			return new ResponseEntity<Output>(playGroundOutput, HttpStatus.OK);
 	}

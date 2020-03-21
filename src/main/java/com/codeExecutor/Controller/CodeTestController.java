@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,16 +31,25 @@ public class CodeTestController {
 	private TestCaseDAO testCaseDAO;
 
 	@PostMapping("/run")
-	public Output run(@RequestBody Input input) throws IOException, InterruptedException {
+	public ResponseEntity<Output> run(@RequestBody Input input) throws IOException, InterruptedException {
+		if (input == null) {
+			return ResponseEntity.badRequest().build();
+		}
 		Question question = questionDAO.getQuestion(input.getqName());
-		return executor.compileRunSampleTestCases(input.getCode(), input.getqName(), input.getLang(),
+		Output runOutput = executor.compileRunSampleTestCases(input.getCode(), input.getqName(), input.getLang(),
 				question.getsInput(), question.getsOutput());
+		return new ResponseEntity<Output>(runOutput, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/submit")
-	public List<Output> submit(@RequestBody Input input) throws IOException, InterruptedException{
+	public ResponseEntity<List<Output>> submit(@RequestBody Input input) throws IOException, InterruptedException {
+		if (input == null) {
+			return ResponseEntity.badRequest().build();
+		}
 		List<TestCase> tesCases = testCaseDAO.getQuestionTestCases(input.getqName());
-		return executor.compileRunTestCases(input.getCode(), input.getqName(), input.getLang(), tesCases);
+		List<Output> outputList = executor.compileRunTestCases(input.getCode(), input.getqName(), input.getLang(),
+				tesCases);
+		return new ResponseEntity<List<Output>>(outputList, HttpStatus.OK);
 	}
 
 }
