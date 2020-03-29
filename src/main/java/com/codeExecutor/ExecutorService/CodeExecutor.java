@@ -1,200 +1,221 @@
 package com.codeExecutor.ExecutorService;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.codeExecutor.ExecutorService.Executors.CExecutor;
 import com.codeExecutor.ExecutorService.Executors.JavaExecutor;
 import com.codeExecutor.model.Output;
 import com.codeExecutor.model.OutputType;
 import com.codeExecutor.model.TestCase;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class CodeExecutor {
 
-	@Autowired
-	private JavaExecutor javaExecutor;
+    @Autowired
+    private JavaExecutor javaExecutor;
 
-	@Autowired
-	private CExecutor cExecutor;
+    @Autowired
+    private CExecutor cExecutor;
 
-	private static String randomFileTimeStampName() {
-		return RandomStringUtils.randomAlphabetic(16);
-	}
+    private static String randomFileTimeStampName() {
+        return RandomStringUtils.randomAlphabetic(16);
+    }
 
-	private static void createFile(String fileName, String code, String dir, String ext, String name)
-			throws IOException {
-		File tempDir = new File(dir + "/" + fileName + "/");
-		if (!tempDir.exists()) {
-			tempDir.mkdirs();
-		}
-		String filepath = dir + "/" + fileName + "/" + name + ext;
+    private static void createFile(String rootDirName, String dirName, String fileName, String ext, String code)
+            throws IOException {
+        File tempDir = new File(rootDirName + "/" + dirName + "/");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        String filepath = rootDirName + "/" + dirName + "/" + fileName + ext;
 
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(filepath)))) {
-			writer.write(code);
-		}
-	}
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(filepath)))) {
+            writer.write(code);
+        }
+    }
 
-	private static void cleanDirectory(String dir, String fileName) throws IOException {
-		String dirPath = dir + "/" + fileName;
-		FileUtils.deleteDirectory(new File(dirPath));
-	}
+    private static void cleanDirectory(String rootDirName, String dirName) throws IOException {
+        String dirPath = rootDirName + "/" + dirName;
+        FileUtils.deleteDirectory(new File(dirPath));
+    }
 
-	private Output compile(String code, String name, String lang, String dirName, String fileName)
+    private String extractClassName(String code) {
+        String[] wordArray = code.split("\\s");
+        List<String> words = Stream.of(wordArray).filter(s -> s != null && !s.isEmpty()).collect(Collectors.toList());
+        for (int i = 1; i < words.size(); i++) {
+            if (words.get(i - 1).equals("public") && words.get(i).equals("class") && words.size() > i + 1) {
+                return words.get(i + 1).replace("{", "");
+            }
+        }
+        return null;
+    }
+
+
+    private Output compile(String rootDirName, String testDirName, String code, String lang)
 			throws IOException, InterruptedException {
-		Output compileResult = null;
-		switch (lang) {
-		case "java":
-			createFile(fileName, code, dirName, ".java", name);
-			compileResult = javaExecutor.compile(name, fileName, dirName);
-			break;
-		case "c":
-			createFile(fileName, code, dirName, ".c", name);
-			compileResult = cExecutor.compile(name, fileName, dirName, lang, 3);
-			break;
-		case "cpp":
-			createFile(fileName, code, dirName, ".cpp", name);
-			compileResult = cExecutor.compile(name, fileName, dirName, lang, 3);
-			break;
+        Output compileOutput = null;
+        String name = "Solution";
+        switch (lang) {
+            case "java":
+                String className = extractClassName(code);
+                if (className == null) {
+                    return new Output("Can't find class", OutputType.COMPILATION_ERROR);
+                }
+                createFile(rootDirName, testDirName, className, ".java", code);
+                compileOutput = javaExecutor.compile(rootDirName, testDirName, className);
+                break;
+            case "c":
+                createFile(rootDirName, testDirName, name, ".c", code);
+                compileOutput = cExecutor.compile(rootDirName, testDirName, name, lang, 3);
+                break;
+            case "cpp":
+                createFile(rootDirName, testDirName, name, ".cpp", code);
+                compileOutput = cExecutor.compile(rootDirName, testDirName, name, lang, 3);
+                break;
+        }
+        return compileOutput;
+    }
+
+    private Output execute(String rootDirName, String testDirName, String code, String input, String lang, int timeout)
+            throws IOException, InterruptedException {
+        Output executionResult = null;
+        String name = "Solution";
+        String inputFileName = null;
+        if (input != null) {
+            inputFileName = "input";
+            createFile(rootDirName, testDirName, inputFileName, "", input);
+        }
+        switch (lang) {
+            case "java":
+                String className = extractClassName(code);
+                executionResult = javaExecutor.execute(rootDirName, testDirName, className, inputFileName, timeout);
+                break;
+            case "c":
+			case "cpp":
+				executionResult = cExecutor.execute(rootDirName, testDirName, name, inputFileName, timeout);
+                break;
 		}
-		return compileResult;
-	}
+        return executionResult;
+    }
 
-	private Output execute(String name, String lang, String input, String fileName, String dirName)
-			throws IOException, InterruptedException {
-		Output executionResult = null;
-		createFile(fileName, input, dirName, "", "input");
-		switch (lang) {
-		case "java":
-			executionResult = javaExecutor.execute(name, fileName, dirName, "input", 3);
-			break;
-		case "c":
-			executionResult = cExecutor.execute(name, fileName, dirName, "input", 3);
-			break;
-		case "cpp":
-			executionResult = cExecutor.execute(name, fileName, dirName, "input", 3);
-			break;
-		}
-		return executionResult;
-	}
+    public Output runCode(String code, String lang, String input, int timeout)
+            throws IOException, InterruptedException {
+        String rootDirName = "Sample";
+        String testDirName = randomFileTimeStampName();
+        Output compileResult;
+        Output executionResult;
 
-	public Output runCode(String code, String name, String lang, String input)
-			throws IOException, InterruptedException {
-		String dirName = "samples";
-		String fileName = randomFileTimeStampName();
-		Output compileResult = null;
-		Output executionResult = null;
+        // compile
+        compileResult = compile(rootDirName, testDirName, code, lang);
 
-		// compile
-		compileResult = compile(code, name, lang, dirName, fileName);
+        if (compileResult.getType() == OutputType.SUCCESS) {
 
-		if (compileResult.getType() == OutputType.SUCCESS) {
-
-			// execute
-			executionResult = execute(name, lang, input, fileName, dirName);
+            // execute
+            executionResult = execute(rootDirName, testDirName, code, input, lang, timeout);
 //			System.out.println(exeRes.getType() + "\n" + exeRes.getOutput() + "time " + exeRes.getTime());
-			cleanDirectory(dirName, fileName);
-			return executionResult;
-		} else {
+            cleanDirectory(rootDirName, testDirName);
+            return executionResult;
+        } else {
 //			System.out.println(compileRes.getType() + "\n" + compileRes.getOutput());
-			cleanDirectory(dirName, fileName);
-			return compileResult;
-		}
+            cleanDirectory(rootDirName, testDirName);
+            return compileResult;
+        }
+    }
 
-	}
+    private boolean comareOutputs(String actual, String expexted) {
+        return actual.trim().compareTo(expexted.trim()) == 0;
+    }
 
-	private boolean comareOutputs(String actual, String expexted) {
-		return actual.trim().compareTo(expexted.trim()) == 0;
-	}
+    public Output compileRunSampleTestCases(String code, String lang, String input, String output, int timeout)
+            throws IOException, InterruptedException {
+        String rootDirName = "samples";
+        String testDirName = randomFileTimeStampName();
+        Output compileResult;
+        Output executionResult;
 
-	public Output compileRunSampleTestCases(String code, String name, String lang, String input, String output)
-			throws IOException, InterruptedException {
-		String dirName = "samples";
-		String fileName = randomFileTimeStampName();
-		Output compileResult = null;
-		Output executionResult = null;
+        // compile
+        compileResult = compile(rootDirName, testDirName, code, lang);
 
-		// compile
-		compileResult = compile(code, name, lang, dirName, fileName);
+        if (compileResult.getType() == OutputType.SUCCESS) {
 
-		if (compileResult.getType() == OutputType.SUCCESS) {
+            // execute
+            executionResult = execute(rootDirName, testDirName, code, input, lang, timeout);
 
-			// execute
-			executionResult = execute(name, lang, input, fileName, dirName);
+            // check expected output and actual output
+            if (executionResult.getType() == OutputType.SUCCESS) {
 
-			// check expected output and actual output
-			if (executionResult.getType() == OutputType.SUCCESS) {
+                if (!comareOutputs(executionResult.getOutput(), output)) {
+                    executionResult.setOutput("Sample Test Case Failed");
+                    executionResult.setType(OutputType.FAILURE);
+                }
+            }
 
-				if (!comareOutputs(executionResult.getOutput(), output)) {
-					executionResult.setOutput("Sample Test Case Failed");
-					executionResult.setType(OutputType.FAILURE);
-				}
-			}
+            cleanDirectory(rootDirName, testDirName);
+            return executionResult;
 
-			cleanDirectory(dirName, fileName);
-			return executionResult;
+        } else {
 
-		} else {
+            // compilation errors
+            cleanDirectory(rootDirName, testDirName);
+            return compileResult;
+        }
 
-			// compilation errors
-			cleanDirectory(dirName, fileName);
-			return compileResult;
-		}
+    }
 
-	}
+    public List<Output> compileRunTestCases(String code, String lang, List<TestCase> testCases, int timeout) throws IOException, InterruptedException {
 
-	public List<Output> compileRunTestCases(String code, String name, String lang, List<TestCase> testCases) throws IOException, InterruptedException {
+        String rootDirName = "samples";
+        String testDirName = randomFileTimeStampName();
+        Output compileResult;
+        Output executionResult;
 
-		String dirName = "samples";
-		String fileName = randomFileTimeStampName();
-		Output compileResult = null;
-		Output executionResult = null;
+        // compile
+        compileResult = compile(rootDirName, testDirName, code, lang);
 
-		// compile
-		compileResult = compile(code, name, lang, dirName, fileName);
+        if (compileResult.getType() == OutputType.SUCCESS) {
 
-		if (compileResult.getType() == OutputType.SUCCESS) {
+            int nTests = testCases.size();
+            List<Output> executionOutputs = new ArrayList<>();
 
-			int nTests = testCases.size();
-			List<Output> executionOutputs = new ArrayList<>();
+            for (int i = 0; i < nTests; i++) {
 
-			for (int i = 0; i < nTests; i++) {
+                // execute
+                executionResult = execute(rootDirName, testDirName, code, testCases.get(i).getInput(), lang, timeout);
 
-				// execute
-				executionResult = execute(name, lang, testCases.get(i).getInput(), fileName, dirName);
-
-				// check expected output and actual output
-				if (executionResult.getType() == OutputType.SUCCESS) {
-
-					if (!comareOutputs(executionResult.getOutput(), testCases.get(i).getOutput())) {
-						executionResult.setOutput("Sample Test Case Failed");
-						executionResult.setType(OutputType.FAILURE);
+                // check expected output and actual output
+                if (executionResult.getType() == OutputType.SUCCESS) {
+                    if (!comareOutputs(executionResult.getOutput(), testCases.get(i).getOutput())) {
+                        executionResult.setOutput("Test Case " + i + " Failed");
+                        executionResult.setType(OutputType.FAILURE);
+                    }else {
+						executionResult.setOutput("Test Case " + i + " Passed");
+						executionResult.setType(OutputType.SUCCESS);
 					}
-				}
+                }
+                executionOutputs.add(executionResult);
+            }
 
-				executionOutputs.add(executionResult);
-			}
+            cleanDirectory(rootDirName, testDirName);
+            return executionOutputs;
 
-			cleanDirectory(dirName, fileName);
-			return executionOutputs;
+        } else {
 
-		} else {
-
-			// compilation errors
-			cleanDirectory(dirName, fileName);
-			return Arrays.asList(new Output[] { executionResult });
-		}
-
-	}
+            // compilation errors
+            cleanDirectory(rootDirName, testDirName);
+            return Collections.singletonList(compileResult);
+        }
+    }
 
 }

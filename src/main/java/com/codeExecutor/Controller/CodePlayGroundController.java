@@ -22,10 +22,11 @@ public class CodePlayGroundController {
 	@PostMapping("/playground")
 	public ResponseEntity<Output> playGround( @RequestBody Input input) throws IOException, InterruptedException {
 		if(input == null) {
-			return new ResponseEntity<Output>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-			Output playGroundOutput = codeExecutor.runCode(input.getCode(), "Sample", input.getLang(), input.getInput());
-			return new ResponseEntity<Output>(playGroundOutput, HttpStatus.OK);
+			int timeoutInSec = 5;
+			Output playGroundOutput = codeExecutor.runCode(input.getCode(),input.getLang(),input.getInput(),timeoutInSec);
+			return new ResponseEntity<>(playGroundOutput, HttpStatus.OK);
 	}
 	
 }

@@ -24,10 +24,10 @@ public class TestCaseDAO {
 	}
 	
 	@Transactional
-	public List<TestCase> getQuestionTestCases(String qName) {
+	public List<TestCase> getQuestionTestCases(long qId) {
 		Session currSession = getCurrSession();
-		Query<TestCase> query = currSession.createQuery("from TestCase t where t.qName = :qName",TestCase.class);
-		query.setParameter("qName", qName);
+		Query<TestCase> query = currSession.createQuery("from TestCase t where t.name = :name",TestCase.class);
+		query.setParameter("name", qId);
 		List<TestCase> testCases = query.getResultList();
 		return testCases;
 	}
@@ -41,9 +41,9 @@ public class TestCaseDAO {
 	@Transactional
 	public void deleteTestCases(String qName) {
 		Session cuSession = getCurrSession();
-		String deleteQuestionTestCases = "delete from TestCase where qName = :qname";
+		String deleteQuestionTestCases = "delete from TestCase where name = :name";
 		Query query = cuSession.createQuery(deleteQuestionTestCases);
-		query.setParameter("qname", qName);
+		query.setParameter("name", qName);
 		query.executeUpdate();
 	}
 }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.codeExecutor.ExecutorService.Executors.JavaExecutor;
+import com.codeExecutor.model.Output;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ import com.codeExecutor.model.TestCase;
 
 
 @RestController("/")
-public class hello {
+public class test {
 	
 	@Autowired
 	private CodeExecutor executor;
@@ -37,11 +39,11 @@ public class hello {
     	return "#include <stdio.h>\n"
     			+ "#include <stdlib.h>\n"
     			+ "void main() {\n"
-    			+ "int a = 0;\n"
-    			+ "int b = 0;\n"
-    			+ "int c = a/b;\n"
+//    			+ "int a = 0;\n"
+//    			+ "int b = 0;\n"
+//    			+ "int c = a/b;\n"
 //    			+ "scanf(\"%d\",&c);\n"
-    			+ "printf(\"Hello world from %d\",c);\n"
+    			+ "printf(\"Hello world\");\n"
     			+ "}";
     }
     
@@ -67,30 +69,51 @@ public class hello {
 	public ResponseEntity printHello() {
 		String id = "hello";
 		String usrDir = System.getProperty("user.dir");
-		try {
+//		try {
 //			executor.runCode(JavaHelloWorld(id),id,"java","111");
 //			executor.runCode(cHelloWorld(), id,"c","111");
-			executor.runCode(cppHelloWorld(), id, "cpp","111");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//			executor.runCode(cppHelloWorld(), id, "cpp","111");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return new ResponseEntity("hello",HttpStatus.OK);
 	}
     
     @Autowired
     private QuestionDAO questionDAO;
+
+    @Autowired
+    private CodeExecutor codeExecutor;
     
     @GetMapping("/test")
-    public void testHiberante() {
+    public void testHiberante() throws IOException, InterruptedException {
 //    	List<TestCase> testList = new ArrayList<>();
 //    	TestCase test1 = new TestCase("1 2 3 4","4 3 2 1");
 //    	Question testQues = new Question("arraySwap", "program to swap array", 1.23, test1);
 //    	questionDAO.addQuestion(testQues);
-//    	
+//
+
+    	//test java code
+//		String sampleJavaCode = JavaHelloWorld("Solution");
+//		Output output = codeExecutor.runCode(sampleJavaCode,"java","Aditya",5);
+
+    	
+    	//test c code
+//    	String sampleCcode = cHelloWorld();
+//    	Output output = codeExecutor.runCode(sampleCcode, "c", "12", 3);
+    	
+    	//test cpp code
+    	String samplecppCode = cppHelloWorld();
+    	Output output = codeExecutor.runCode(samplecppCode, "cpp", "112", 3);
+    	
+    	
+    	
+		System.out.println(output.getOutput()+" "+output.getType());
+
     	
     }
     

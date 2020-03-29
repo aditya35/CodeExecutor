@@ -21,35 +21,36 @@ import com.codeExecutor.model.Input;
 @RestController
 public class CodeTestController {
 
-	@Autowired
-	private CodeExecutor executor;
+    @Autowired
+    private CodeExecutor executor;
 
-	@Autowired
-	private QuestionDAO questionDAO;
+    @Autowired
+    private QuestionDAO questionDAO;
 
-	@Autowired
-	private TestCaseDAO testCaseDAO;
+    @Autowired
+    private TestCaseDAO testCaseDAO;
 
-	@PostMapping("/run")
-	public ResponseEntity<Output> run(@RequestBody Input input) throws IOException, InterruptedException {
-		if (input == null) {
-			return ResponseEntity.badRequest().build();
-		}
-		Question question = questionDAO.getQuestion(input.getqName());
-		Output runOutput = executor.compileRunSampleTestCases(input.getCode(), input.getqName(), input.getLang(),
-				question.getsInput(), question.getsOutput());
-		return new ResponseEntity<Output>(runOutput, HttpStatus.OK);
-	}
+    @PostMapping("/run")
+    public ResponseEntity<Output> run(@RequestBody Input input) throws IOException, InterruptedException {
+        if (input == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Question question = questionDAO.getQuestion(input.getQuestionId());
+        int timeoutInSec = 5;
+        Output runOutput = executor.compileRunSampleTestCases(input.getCode(), input.getLang(),
+                input.getInput(), question.getsOutput(), timeoutInSec);
+        return new ResponseEntity<Output>(runOutput, HttpStatus.OK);
+    }
 
-	@PostMapping("/submit")
-	public ResponseEntity<List<Output>> submit(@RequestBody Input input) throws IOException, InterruptedException {
-		if (input == null) {
-			return ResponseEntity.badRequest().build();
-		}
-		List<TestCase> tesCases = testCaseDAO.getQuestionTestCases(input.getqName());
-		List<Output> outputList = executor.compileRunTestCases(input.getCode(), input.getqName(), input.getLang(),
-				tesCases);
-		return new ResponseEntity<List<Output>>(outputList, HttpStatus.OK);
-	}
+    @PostMapping("/submit")
+    public ResponseEntity<List<Output>> submit(@RequestBody Input input) throws IOException, InterruptedException {
+        if (input == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        int timeoutInSec = 5;
+        List<TestCase> tesCases = testCaseDAO.getQuestionTestCases(input.getQuestionId());
+        List<Output> outputList = executor.compileRunTestCases(input.getCode(), input.getLang(), tesCases, timeoutInSec);
+        return new ResponseEntity<>(outputList, HttpStatus.OK);
+    }
 
 }

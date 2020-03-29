@@ -30,37 +30,22 @@ public class QuestionDAO {
 	}
 	
 	@Transactional
-	public Question getQuestion(String name) {
+	public Question getQuestion(long id) {
 		Session currentSession =  getCurrSession();
-		Question question = currentSession.get(Question.class, name);
+		Question question = currentSession.get(Question.class, id);
 		return question;
 	}
 	
-	public boolean checkName(String name) {
-		if(name.indexOf(" ")==-1) {
-			return true;
-		}
-		return false;
+	@Transactional
+	public void addQuestion(Question question) {
+		Session currSession = getCurrSession();
+		currSession.saveOrUpdate(question);
 	}
 	
 	@Transactional
-	public String addQuestion(Question question) {
-		if(!checkName(question.getName())) {
-			return "check file Name";
-		}
-		Session currentSession = getCurrSession();
-		if(currentSession.contains(question)) {
-			return "Question already present";
-		}
-//		System.out.println(question);
-		currentSession.save(question);
-		return "Question added";
-	}
-	
-	@Transactional
-	public boolean deleteQuestion(String name) {
+	public boolean deleteQuestion(long id) {
 		Session currentSession= getCurrSession();
-		Question question = currentSession.get(Question.class, name);
+		Question question = currentSession.get(Question.class,id);
 		if(question==null) {
 			return false;
 		}

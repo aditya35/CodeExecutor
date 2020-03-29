@@ -11,8 +11,8 @@ public class Output {
 		this.output = output;
 		this.type = type;
 	}
-	
-	public Output(String output, OutputType type ,double time) {
+
+	public Output(String output, OutputType type , double time) {
 		this.output = output;
 		this.type = type;
 		this.time = time;
@@ -41,7 +41,15 @@ public class Output {
 		this.time = time;
 	}
 
-	
+
+	@Override
+	public String toString() {
+		return "Output{" +
+				"output='" + output + '\'' +
+				", type=" + type +
+				", time=" + time +
+				'}';
+	}
 	
 		
 	

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,9 +32,9 @@ public class QuestionController {
 		return questionDAO.getAllQuestions();
 	}
 
-	@GetMapping("/question/{name}")
-	public ResponseEntity<Question> getQuestion(@PathVariable String name) {
-		Question question = questionDAO.getQuestion(name);
+	@GetMapping("/question/{id}")
+	public ResponseEntity<Question> getQuestion(@PathVariable long id) {
+		Question question = questionDAO.getQuestion(id);
 		if (question == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -41,21 +42,22 @@ public class QuestionController {
 	}
 
 	@PostMapping("/question")
-	public ResponseEntity<String> addNewQuestion(@RequestBody Question question) {
+	public ResponseEntity<Object> addNewQuestion(@RequestBody Question question) {
 		if(question == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		String returnMsg = questionDAO.addQuestion(question);
-		if(returnMsg.equalsIgnoreCase("check file Name")) {
-			return new ResponseEntity<String>("Invalid Question Name", HttpStatus.BAD_REQUEST);
-		} else if (returnMsg.equalsIgnoreCase("Question already present")) {
-			return new ResponseEntity<String>("Question already Present",HttpStatus.CONFLICT);
-		}
-		return new ResponseEntity<String>("Question Added",HttpStatus.CREATED);
+		questionDAO.addQuestion(question);
+		return ResponseEntity.ok().build();
+	}
+	
+	@PutMapping("/question")
+	public ResponseEntity<Object> updateQuestion(@RequestBody Question question) {
+		questionDAO.addQuestion(question);
+		return ResponseEntity.ok().build();
 	}
 	
 	@PostMapping("/testcases")
-	public ResponseEntity addTestCases(@RequestBody List<TestCase> testCases) {
+	public ResponseEntity<Object> addTestCases(@RequestBody List<TestCase> testCases) {
 		if(testCases.size()==0) {
 			return ResponseEntity.badRequest().build();
 		}
@@ -66,10 +68,10 @@ public class QuestionController {
 	}
 
 	@DeleteMapping("/question/{name}")
-	public ResponseEntity<String> deleteQuestion(String name) {
+	public ResponseEntity<String> deleteQuestion(long qId) {
 		try {
-			questionDAO.deleteQuestion(name);
-			testCaseDAO.deleteTestCases(name);
+			testCaseDAO.deleteTestCases(questionDAO.getQuestion(qId).getqName());
+			questionDAO.deleteQuestion(qId);
 		}catch (Throwable e) {
 			return new ResponseEntity<String>("Error deleting Question",HttpStatus.INTERNAL_SERVER_ERROR);
 		}

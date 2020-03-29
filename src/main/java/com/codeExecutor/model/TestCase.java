@@ -14,7 +14,7 @@ public class TestCase {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "test_id")
+	@Column(name = "id", updatable = false, nullable = false)
 	private long id;
 
 	@Column(name = "input")
@@ -28,6 +28,13 @@ public class TestCase {
 	private String qName;
 	
 	public TestCase() {
+	}
+
+	public TestCase(String input, String output, String qName) {
+		super();
+		this.input = input;
+		this.output = output;
+		this.qName = qName;
 	}
 
 	public String getInput() {
@@ -57,19 +64,8 @@ public class TestCase {
 	public long getId() {
 		return id;
 	}
-
-	public TestCase(String input, String output, String qName) {
-		super();
-		this.input = input;
-		this.output = output;
-		this.qName = qName;
-	}
-
-	@Override
-	public String toString() {
-		return "TestCase [id=" + id + ", input=" + input + ", output=" + output + ", qName=" + qName + "]";
-	}
-
+	
 	
 
+	
 }

@@ -2,6 +2,8 @@ package com.codeExecutor.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,7 +12,11 @@ import javax.persistence.Table;
 public class Question {
 
 	@Id
-	@Column(name = "name")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", updatable = false, nullable = false)
+	private Long id;
+	
+	@Column(name="name")
 	private String name;
 
 	@Column(name = "description")
@@ -28,20 +34,20 @@ public class Question {
 	public Question() {
 	}
 
-	public Question(String name, String description, double time, String sInput, String sOutput) {
+	public Question(String qName, String description, double time, String sInput, String sOutput) {
 		super();
-		this.name = name;
+		this.name = qName;
 		this.description = description;
 		this.time = time;
 		this.sInput = sInput;
 		this.sOutput = sOutput;
 	}
 
-	public String getName() {
+	public String getqName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setqName(String name) {
 		this.name = name;
 	}
 
@@ -77,4 +83,7 @@ public class Question {
 		this.sOutput = sOutput;
 	}
 
+	public Long getId() {
+		return id;
+	}
 }
