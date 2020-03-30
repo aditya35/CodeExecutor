@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,12 +45,7 @@ public class QuestionController {
 		if(question == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		questionDAO.addQuestion(question);
-		return ResponseEntity.ok().build();
-	}
-	
-	@PutMapping("/question")
-	public ResponseEntity<Object> updateQuestion(@RequestBody Question question) {
+		System.out.println(question);
 		questionDAO.addQuestion(question);
 		return ResponseEntity.ok().build();
 	}
@@ -70,7 +64,7 @@ public class QuestionController {
 	@DeleteMapping("/question/{name}")
 	public ResponseEntity<String> deleteQuestion(long qId) {
 		try {
-			testCaseDAO.deleteTestCases(questionDAO.getQuestion(qId).getqName());
+			testCaseDAO.deleteTestCases(questionDAO.getQuestion(qId).getName());
 			questionDAO.deleteQuestion(qId);
 		}catch (Throwable e) {
 			return new ResponseEntity<String>("Error deleting Question",HttpStatus.INTERNAL_SERVER_ERROR);

@@ -34,20 +34,20 @@ public class Question {
 	public Question() {
 	}
 
-	public Question(String qName, String description, double time, String sInput, String sOutput) {
+	public Question(String name, String description, double time, String sInput, String sOutput) {
 		super();
-		this.name = qName;
+		this.name = name;
 		this.description = description;
 		this.time = time;
 		this.sInput = sInput;
 		this.sOutput = sOutput;
 	}
 
-	public String getqName() {
+	public String getName() {
 		return name;
 	}
 
-	public void setqName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
@@ -86,4 +86,12 @@ public class Question {
 	public Long getId() {
 		return id;
 	}
+
+	@Override
+	public String toString() {
+		return "Question [id=" + id + ", name=" + name + ", description=" + description + ", time=" + time + ", sInput="
+				+ sInput + ", sOutput=" + sOutput + "]";
+	}
+	
+	
 }
